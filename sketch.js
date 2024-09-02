@@ -40,6 +40,20 @@ let songDuration = notes.length * noteDelay * 1000;
 let songStart = 0;
 let songGameStart = 0;
 let gameSongDuration = 0;
+let playerDirection = 1;
+const stormGods = [
+  "THOR",
+  "INDRA",
+  "TARANIS",
+  "TEMPESTAS",
+  "CHAAHK",
+  "AEOLUS",
+  "SUSANOO",
+  "ZEUS",
+  "RAIJIN",
+  "TEFNUT",
+];
+const stormGodChosen = stormGods[Math.round(Math.random() * stormGods.length)];
 
 const jumpHeight = 90;
 const jumpRun = 70;
@@ -81,9 +95,11 @@ document.body.onkeydown = (e) => {
   }
   if (e.key === "d") {
     dIsDown = true;
+    playerDirection = 1;
   }
   if (e.key === "a") {
     aIsDown = true;
+    playerDirection = -1;
   }
   if (e.key === "Enter") {
     gameStart = true;
@@ -100,6 +116,7 @@ document.body.onkeydown = (e) => {
   }
   if (e.key === "r" && state === "end") {
     state = "game";
+    gameSong();
   }
 };
 
@@ -427,6 +444,7 @@ function draw() {
         numPlatforms++;
         generatePlatforms();
         stopSoundEffects();
+        gameSong();
       } else if (numPlatforms === 13) {
         for (let i = 0; i < numPlatforms; i++) {
           if (i === 0) {
@@ -460,6 +478,7 @@ function draw() {
         generatePlatforms();
         gameTime = Math.floor(performance.now() / 1000);
         stopSoundEffects();
+        menuSong();
         return;
       }
     }
@@ -514,15 +533,62 @@ function draw() {
       (dIsDown === true || aIsDown === true)
     ) {
       ctx.fillRect(playerx, playery - 10, playerSize, playerSize);
+      //clothing
+      ctx.fillStyle = colors.blue;
+      ctx.lineWidth = 2;
+      ctx.beginPath;
+      ctx.moveTo(playerx, playery + playerSize / 2 - 10);
+      ctx.lineTo(playerx + playerSize, playery + playerSize / 2 - 10);
+      if (playerDirection === 1) {
+        ctx.lineTo(playerx, playery + playerSize - 10);
+      } else {
+        ctx.lineTo(playerx + playerSize, playery + playerSize - 10);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      //eye
+      ctx.fillStyle = "black";
+      if (playerDirection === 1) {
+        ctx.fillRect(
+          playerx + playerSize - 3,
+          playery + playerSize / 10 - 10,
+          2,
+          2
+        );
+      } else {
+        ctx.fillRect(playerx + 3, playery + playerSize / 10 - 10, 2, 2);
+      }
     } else {
       ctx.fillRect(playerx, playery, playerSize, playerSize);
+      //clothing
+      ctx.fillStyle = colors.blue;
+      ctx.lineWidth = 2;
+      ctx.beginPath;
+      ctx.moveTo(playerx, playery + playerSize / 2);
+      ctx.lineTo(playerx + playerSize, playery + playerSize / 2);
+      if (playerDirection === 1) {
+        ctx.lineTo(playerx, playery + playerSize);
+      } else {
+        ctx.lineTo(playerx + playerSize, playery + playerSize);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "black";
+      //eye
+      if (playerDirection === 1) {
+        ctx.fillRect(playerx + playerSize - 3, playery + playerSize / 10, 2, 2);
+      } else {
+        ctx.fillRect(playerx + 3, playery + playerSize / 10, 2, 2);
+      }
     }
 
     ctx.restore();
     //Game music
     if (
       songPlayed === true &&
-      performance.now() - songGameStart >= gameSongDuration
+      performance.now() - songStart >= gameSongDuration
     ) {
       gameSong(); // Restart the music
     }
@@ -554,13 +620,60 @@ function draw() {
 
   // draw Menu State
   if (state === "menu") {
-    //music
-    if (songPlayed === true && performance.now() - songStart >= songDuration) {
-      menuSong(); // Restart the music
-    }
+    //drawing
 
-    if (songPlayed === false && gameClicked === true) {
-      menuSong();
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, colors.black);
+    gradient.addColorStop(0.7, colors.pink);
+    gradient.addColorStop(1, colors.yellow);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawStars();
+    ctx.fillStyle = colors.black;
+    ctx.fillRect(0, 300, canvas.width, 100);
+    //make player bigger for clothing purposes
+    ctx.fillStyle = colors.pink;
+    ctx.fillRect(canvas.width / 2, 300 - playerSize, playerSize, playerSize);
+    ctx.fillStyle = colors.blue;
+    ctx.beginPath;
+    ctx.moveTo(canvas.width / 2, 300 - playerSize / 2);
+    ctx.lineTo(canvas.width / 2 + playerSize, 300 - playerSize / 2);
+    ctx.lineTo(canvas.width / 2, 300);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    //eye
+    ctx.fillStyle = "black";
+    ctx.fillRect(
+      canvas.width / 2 + playerSize - 2,
+      300 - (playerSize / 4) * 3.5,
+      2,
+      2
+    );
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = colors.white;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.font = "30px Arial";
+    ctx.fillText("The Thirteen Storms of", canvas.width / 2, 60);
+    ctx.fillStyle = colors.black;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.font = "40px Georgia";
+    ctx.fillText(stormGodChosen, canvas.width / 2, 140);
+
+    //music
+    {
+      if (
+        songPlayed === true &&
+        performance.now() - songStart >= songDuration
+      ) {
+        menuSong(); // Restart the music
+      }
+
+      if (songPlayed === false && gameClicked === true) {
+        menuSong();
+      }
     }
   }
   // Draw End State
@@ -568,61 +681,79 @@ function draw() {
     if (songPlayed === true && performance.now() - songStart >= songDuration) {
       menuSong(); // Restart the music
     }
-    const gradient = ctx.createLinearGradient(0, 150, 0, 250);
-    gradient.addColorStop(0.25, blackAlpha);
-    gradient.addColorStop(0.5, colors.black);
-    gradient.addColorStop(0.75, blackAlpha);
-    ctx.fillStyle = colors.yellow;
+
+    //Storm Braved Gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 125);
+    gradient.addColorStop(0.05, blackAlpha);
+    gradient.addColorStop(0.3, colors.black);
+    gradient.addColorStop(0.7, blackAlpha);
+
+    //Background Gradient
+    const gradientBackground = ctx.createLinearGradient(0, 400, 0, 0);
+    gradientBackground.addColorStop(1, colors.black);
+    gradientBackground.addColorStop(0.45, colors.pink);
+    gradientBackground.addColorStop(0, colors.yellow);
+
+    ctx.fillStyle = gradientBackground;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 150, canvas.width, 100);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = colors.purple;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "40px Arial";
-    ctx.fillText("Storm Braved", canvas.width / 2, canvas.height / 2);
-    ctx.font = "20px Arial";
-    ctx.fillText(
-      "in " + displayMinutes + ":" + displaySeconds,
-      canvas.width / 2,
-      canvas.height / 2 + 27
-    );
-    ctx.fillStyle = colors.black;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "20px Arial";
-    for (
-      let i = 0;
-      i < Math.floor(displaySubtractedLevelTimeMinutes.length / 2);
-      i++
-    ) {
+    // ctx.fillStyle = gradient;
+    // ctx.fillRect(0, 0, canvas.width, 125);
+
+    //draw text
+    {
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = colors.purple;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.font = "40px Arial";
+      ctx.fillText("Storm Braved", canvas.width / 2, 60);
+      ctx.fillStyle = colors.black;
+      ctx.font = "20px Arial";
       ctx.fillText(
-        i +
-          1 +
-          " " +
-          displaySubtractedLevelTimeMinutes[i] +
-          ":" +
-          displaySubtractedLevelTimeSeconds[i],
+        "in " + displayMinutes + ":" + displaySeconds,
         canvas.width / 2,
-        20 + i * 22
+        60 + 27
       );
-    }
-    for (let i = 6; i < displaySubtractedLevelTimeMinutes.length; i++) {
+      ctx.fillStyle = colors.black;
+      ctx.font = "17px Arial";
+      ctx.fillText("Press R to Restart", canvas.width / 2, 111);
+
       ctx.fillStyle = colors.black;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.font = "20px Arial";
-      ctx.fillText(
-        i +
-          1 +
-          " " +
-          displaySubtractedLevelTimeMinutes[i] +
-          ":" +
-          displaySubtractedLevelTimeSeconds[i],
-        canvas.width / 2,
-        260 + (i - 6) * 22
-      );
+      for (
+        let i = 0;
+        i < Math.floor(displaySubtractedLevelTimeMinutes.length / 2);
+        i++
+      ) {
+        ctx.fillText(
+          i +
+            1 +
+            " " +
+            displaySubtractedLevelTimeMinutes[i] +
+            ":" +
+            displaySubtractedLevelTimeSeconds[i],
+          canvas.width / 3,
+          225 + i * 25
+        );
+      }
+      for (let i = 6; i < displaySubtractedLevelTimeMinutes.length; i++) {
+        ctx.fillStyle = colors.black;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "20px Arial";
+        ctx.fillText(
+          i +
+            1 +
+            " " +
+            displaySubtractedLevelTimeMinutes[i] +
+            ":" +
+            displaySubtractedLevelTimeSeconds[i],
+          (canvas.width / 3) * 2,
+          225 + (i - 6) * 25
+        );
+      }
     }
   }
   //draw game art functions
@@ -636,30 +767,6 @@ function draw() {
     drawStars();
 
     //stars
-    function drawStars() {
-      if (ctx === null) {
-        throw new Error("hi");
-      }
-
-      for (let i = 0; i < stars.length; i++) {
-        const starOscSpeed = stars[i].movement * 0.01;
-        // 0-1 with time
-        const additionalRadius =
-          (Math.sin(performance.now() * starOscSpeed) + 1) / 2;
-        ctx.fillStyle = colors.white;
-        ctx.beginPath();
-        const starSizeMultiplier = 0.25;
-        const radius = stars[i].r * starSizeMultiplier + additionalRadius;
-        ctx.roundRect(
-          stars[i].x - radius,
-          stars[i].y - radius,
-          radius * 2,
-          radius * 2,
-          100
-        );
-        ctx.fill();
-      }
-    }
   }
   function drawGoal() {
     const lastPlatform = platforms[platforms.length - 1];
@@ -794,6 +901,30 @@ function draw() {
     ctx.font = "25px Arial";
     ctx.fillText("ESC to Pause", spawnx, spawny + 50);
   }
+  function drawStars() {
+    if (ctx === null) {
+      throw new Error("hi");
+    }
+
+    for (let i = 0; i < stars.length; i++) {
+      const starOscSpeed = stars[i].movement * 0.01;
+      // 0-1 with time
+      const additionalRadius =
+        (Math.sin(performance.now() * starOscSpeed) + 1) / 2;
+      ctx.fillStyle = colors.white;
+      ctx.beginPath();
+      const starSizeMultiplier = 0.25;
+      const radius = stars[i].r * starSizeMultiplier + additionalRadius;
+      ctx.roundRect(
+        stars[i].x - radius,
+        stars[i].y - radius,
+        radius * 2,
+        radius * 2,
+        100
+      );
+      ctx.fill();
+    }
+  }
 }
 
 //menu music
@@ -818,7 +949,7 @@ function gameSong() {
       );
     }
     songPlayed = true;
-    songGameStart = performance.now();
+    songStart = performance.now();
     gameSongDuration =
       notes.length * (gameDelayStart - gameSongDelay * numPlatforms) * 1000;
   }
