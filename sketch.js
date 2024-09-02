@@ -53,7 +53,7 @@ const stormGods = [
   "RAIJIN",
   "TEFNUT",
 ];
-const stormGodChosen = stormGods[Math.round(Math.random() * stormGods.length)];
+const stormGodChosen = stormGods[Math.floor(Math.random() * stormGods.length)];
 
 const jumpHeight = 90;
 const jumpRun = 70;
@@ -635,7 +635,7 @@ function draw() {
     ctx.fillStyle = colors.pink;
     ctx.fillRect(canvas.width / 2, 300 - playerSize, playerSize, playerSize);
     ctx.fillStyle = colors.blue;
-    ctx.beginPath;
+    ctx.beginPath();
     ctx.moveTo(canvas.width / 2, 300 - playerSize / 2);
     ctx.lineTo(canvas.width / 2 + playerSize, 300 - playerSize / 2);
     ctx.lineTo(canvas.width / 2, 300);
@@ -911,7 +911,6 @@ function draw() {
       // 0-1 with time
       const additionalRadius =
         (Math.sin(performance.now() * starOscSpeed) + 1) / 2;
-      ctx.fillStyle = colors.white;
       ctx.beginPath();
       const starSizeMultiplier = 0.25;
       const radius = stars[i].r * starSizeMultiplier + additionalRadius;
@@ -922,6 +921,7 @@ function draw() {
         radius * 2,
         100
       );
+      ctx.fillStyle = colors.white;
       ctx.fill();
     }
   }
