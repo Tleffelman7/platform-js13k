@@ -116,6 +116,7 @@ document.body.onkeydown = (e) => {
   }
   if (e.key === "r" && state === "end") {
     state = "game";
+    stopSoundEffects;
     gameSong();
   }
 };
@@ -633,11 +634,16 @@ function draw() {
     ctx.fillRect(0, 300, canvas.width, 100);
     //make player bigger for clothing purposes
     ctx.fillStyle = colors.pink;
-    ctx.fillRect(canvas.width / 2, 300 - playerSize, playerSize, playerSize);
+    ctx.fillRect(
+      canvas.width / 2,
+      300 - playerSize * 4,
+      playerSize * 4,
+      playerSize * 4
+    );
     ctx.fillStyle = colors.blue;
     ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 300 - playerSize / 2);
-    ctx.lineTo(canvas.width / 2 + playerSize, 300 - playerSize / 2);
+    ctx.moveTo(canvas.width / 2, 300 - (playerSize * 4) / 2);
+    ctx.lineTo(canvas.width / 2 + playerSize * 4, 300 - (playerSize * 4) / 2);
     ctx.lineTo(canvas.width / 2, 300);
     ctx.closePath();
     ctx.fill();
@@ -645,10 +651,10 @@ function draw() {
     //eye
     ctx.fillStyle = "black";
     ctx.fillRect(
-      canvas.width / 2 + playerSize - 2,
-      300 - (playerSize / 4) * 3.5,
-      2,
-      2
+      canvas.width / 2 + playerSize * 4 - 12,
+      300 - ((playerSize * 4) / 4) * 3.5,
+      2 * 4,
+      2 * 4
     );
     ctx.globalAlpha = 1;
     ctx.fillStyle = colors.white;
