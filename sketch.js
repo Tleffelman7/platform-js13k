@@ -24,7 +24,7 @@ let levelTimes = [];
 let stars = [];
 const audioctx = new AudioContext();
 const masterGain = audioctx.createGain();
-masterGain.gain.setValueAtTime(0.5, 0);
+masterGain.gain.setValueAtTime(0.2, 0);
 masterGain.connect(audioctx.destination);
 let songPlayed = false;
 let gameClicked = false;
@@ -33,8 +33,13 @@ const notes = [
   261.61, 311.1, 261.6, 349.2, 261.61, 311.1, 261.6, 349.2, 261.61, 311.1,
   261.6, 196.0, 261.61, 311.1, 261.6, 196,
 ];
-let songEnd = notes.length * 0.5 + performance.now();
+let noteDelay = 0.5;
+let gameDelayStart = 0.3;
+let gameSongDelay = 0.01538;
+let songDuration = notes.length * noteDelay * 1000;
 let songStart = 0;
+let songGameStart = 0;
+let gameSongDuration = 0;
 
 const jumpHeight = 90;
 const jumpRun = 70;
@@ -421,6 +426,7 @@ function draw() {
       if (numPlatforms < 13) {
         numPlatforms++;
         generatePlatforms();
+        stopSoundEffects();
       } else if (numPlatforms === 13) {
         for (let i = 0; i < numPlatforms; i++) {
           if (i === 0) {
@@ -453,6 +459,7 @@ function draw() {
         numPlatforms = 1;
         generatePlatforms();
         gameTime = Math.floor(performance.now() / 1000);
+        stopSoundEffects();
         return;
       }
     }
@@ -488,14 +495,16 @@ function draw() {
       mirror();
       ctx.restore();
     }
-
-    drawMirror(drawAll);
-    drawMirror(drawMountains);
-    drawMirror(drawFloor);
-    drawMirror(drawControls);
-    drawMirror(drawGoal);
-    drawMirror(drawClouds);
-    drawMirror(drawPlatforms);
+    //draw mirror background
+    {
+      drawMirror(drawAll);
+      drawMirror(drawMountains);
+      drawMirror(drawFloor);
+      drawMirror(drawControls);
+      drawMirror(drawGoal);
+      drawMirror(drawClouds);
+      drawMirror(drawPlatforms);
+    }
     //draw player
     ctx.fillStyle = colors.pink;
     const playerAnimateFrames = Math.round(performance.now() / 150);
@@ -510,6 +519,13 @@ function draw() {
     }
 
     ctx.restore();
+    //Game music
+    if (
+      songPlayed === true &&
+      performance.now() - songGameStart >= gameSongDuration
+    ) {
+      gameSong(); // Restart the music
+    }
 
     //draw pause menu
     if (state === "pause") {
@@ -539,16 +555,19 @@ function draw() {
   // draw Menu State
   if (state === "menu") {
     //music
+    if (songPlayed === true && performance.now() - songStart >= songDuration) {
+      menuSong(); // Restart the music
+    }
 
     if (songPlayed === false && gameClicked === true) {
-      gameSong();
-    }
-    if (songPlayed === false && performance.now() - songStart >= songEnd) {
-      gameSong(); // Restart the music
+      menuSong();
     }
   }
   // Draw End State
   if (state === "end") {
+    if (songPlayed === true && performance.now() - songStart >= songDuration) {
+      menuSong(); // Restart the music
+    }
     const gradient = ctx.createLinearGradient(0, 150, 0, 250);
     gradient.addColorStop(0.25, blackAlpha);
     gradient.addColorStop(0.5, colors.black);
@@ -776,13 +795,32 @@ function draw() {
     ctx.fillText("ESC to Pause", spawnx, spawny + 50);
   }
 }
-function gameSong() {
+
+//menu music
+function menuSong() {
   for (let i = 0; i < notes.length; i++) {
     {
-      soundEffect("sine", notes[i], 1, i * 0.5);
+      soundEffect("sine", notes[i], noteDelay, i * noteDelay);
     }
     songPlayed = true;
     songStart = performance.now();
+  }
+}
+//game music
+function gameSong() {
+  for (let i = 0; i < notes.length; i++) {
+    {
+      soundEffect(
+        "sine",
+        notes[i],
+        gameDelayStart - gameSongDelay * numPlatforms,
+        i * (gameDelayStart - gameSongDelay * numPlatforms)
+      );
+    }
+    songPlayed = true;
+    songGameStart = performance.now();
+    gameSongDuration =
+      notes.length * (gameDelayStart - gameSongDelay * numPlatforms) * 1000;
   }
 }
 
