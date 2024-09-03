@@ -25,6 +25,7 @@ let stars = [];
 const audioctx = new AudioContext();
 const masterGain = audioctx.createGain();
 masterGain.gain.setValueAtTime(0.2, 0);
+let gameMute=false
 masterGain.connect(audioctx.destination);
 let songPlayed = false;
 let gameClicked = false;
@@ -70,10 +71,10 @@ const peakHeight = 100;
 const peakWidth = 10;
 
 let platforms = [
-  // { x: 100, y: 330, w: 50, h: playerSize * 1.5 }
+ 
 ];
 let clouds = [
-  // { x: 20, y: 390, w: 10, h: 10, angry: false }
+  
 ];
 let firstY = 330;
 const canvas = document.createElement("canvas");
@@ -90,7 +91,9 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
 }
 
 document.body.onkeydown = (e) => {
-  if (e.key === "w" && touchGrass === true) {
+  if (e.key === "w" ) 
+    //&& touchGrass === true
+   {
     playerdy = -10;
   }
   if (e.key === "d") {
@@ -108,6 +111,12 @@ document.body.onkeydown = (e) => {
   if (e.key === "Escape") {
     pauseMenu = true;
     gameStart = false;
+  }
+  if (e.key==="m"&& gameMute===false)
+    {masterGain.gain.setValueAtTime(0, 0);
+    gameMute=true
+  }else if(gameMute===true){masterGain.gain.setValueAtTime(0.2, 0)
+    gameMute=false
   }
 
   if (e.key === "Enter" && state === "menu") {
@@ -134,7 +143,7 @@ document.body.onclick = (e) => {
 };
 
 //random platforms
-//let platforms = [];
+
 const startY = 730;
 
 let numPlatforms = 1;
@@ -179,14 +188,7 @@ function generatePlatforms() {
         newCenterX + width / 2 <
           platformMaxSpawnx + (gameAreaWidth - platformMaxSpawnx) / 2
       ) {
-        // x: firstX,
-        // y: startY,
-        // w: firstWidth,
-        // h: playerSize * 1.5,
-        // peakx: firstX + firstWidth / 2,
-        // peaky: -peakHeight + startY,
-        // leftEdge: firstX - peakWidth,
-        // rightEdge: firstX + firstWidth + peakWidth,
+        
         platforms.push({
           x: newCenterX - width / 2,
           y: newY,
@@ -231,15 +233,15 @@ generatePlatforms();
 function generateStars() {
   const starRadius = 100;
 
-  //x,y,w,h (same number),r=100
+ 
 
   stars = [];
 
-  for (let i = 0; i <= 1000; i++) {
+  for (let i = 0; i <= 1100; i++) {
     let starSize = Math.random() * 4 + 2;
     stars.push({
       x: Math.random() * gameAreaWidth,
-      y: -250 + Math.random() * 1050,
+      y: -400 + Math.random() * 1200,
       r: starSize,
       movement: Math.random() + 1,
     });
@@ -248,9 +250,10 @@ function generateStars() {
 
 generateStars();
 //starMovement();
-let state = "menu"; // "menu" "game" "pause" "end"
+let state = "game"; // "menu" "game" "pause" "end"
 
 function draw() {
+  console.log(playery)
   const ctx = canvas.getContext("2d");
   if (ctx === null) {
     throw new Error("hi");
@@ -361,7 +364,7 @@ function draw() {
     }
 
     //controls
-    //CAN MAKE FUNCTION WORK WITH VARIABLES
+   
     if (dIsDown === true) {
       playerx += 2;
     }
@@ -405,22 +408,7 @@ function draw() {
         }
       }
 
-      // bottom half
-      //   if (
-      //     rectIntersect(
-      //       playerx,
-      //       playery,
-      //       playerSize,
-      //       playerSize,
-      //       platform[i].x,
-      //       platform[i].y + platform[i].h / 2,
-      //       platform[i].w,
-      //       platform[i].h / 2
-      //     )
-      //   ) {
-      //     playery = platform[i].y + platform[i].h;
-      //     playerdy = 0;
-      //   }
+   
     }
     //player at end
 
@@ -447,6 +435,8 @@ function draw() {
         stopSoundEffects();
         gameSong();
       } else if (numPlatforms === 13) {
+        // Time it took to complete Levels
+        {
         for (let i = 0; i < numPlatforms; i++) {
           if (i === 0) {
             subtractedLevelTime.push(levelTimes[0]);
@@ -470,10 +460,7 @@ function draw() {
               "0" + displaySubtractedLevelTimeSeconds[i];
           }
         }
-        console.log(
-          displaySubtractedLevelTimeMinutes,
-          displaySubtractedLevelTimeSeconds
-        );
+      }
         state = "end";
         numPlatforms = 1;
         generatePlatforms();
@@ -487,7 +474,6 @@ function draw() {
     //player bounds
     playerx = Math.round((gameAreaWidth + playerx) % gameAreaWidth);
 
-    // playery = Math.max(0, playery);
     playery = Math.min(800 - playerSize, playery);
 
     //drawing
@@ -769,7 +755,7 @@ function draw() {
       throw new Error("hi");
     }
     ctx.fillStyle = "black";
-    ctx.fillRect(0, -250, gameAreaWidth, canvas.height + 650);
+    ctx.fillRect(0, -400, gameAreaWidth, canvas.height + 800);
     drawStars();
 
     //stars
