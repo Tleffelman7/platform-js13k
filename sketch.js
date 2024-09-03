@@ -24,7 +24,7 @@ let levelTimes = [];
 let stars = [];
 const audioctx = new AudioContext();
 const masterGain = audioctx.createGain();
-masterGain.gain.setValueAtTime(0.2, 0);
+masterGain.gain.setValueAtTime(0, 0);
 let gameMute=false
 masterGain.connect(audioctx.destination);
 let songPlayed = false;
@@ -91,9 +91,7 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
 }
 
 document.body.onkeydown = (e) => {
-  if (e.key === "w" ) 
-    //&& touchGrass === true
-   {
+  if (e.key === "w" && touchGrass === true){
     playerdy = -10;
   }
   if (e.key === "d") {
@@ -253,7 +251,7 @@ generateStars();
 let state = "game"; // "menu" "game" "pause" "end"
 
 function draw() {
-  console.log(playery)
+  
   const ctx = canvas.getContext("2d");
   if (ctx === null) {
     throw new Error("hi");
@@ -513,7 +511,8 @@ function draw() {
     }
     //draw player
     ctx.fillStyle = colors.pink;
-    const playerAnimateFrames = Math.round(performance.now() / 150);
+    let playerAnimateSpeed=150
+    const playerAnimateFrames = Math.round(performance.now() / playerAnimateSpeed);
     if (
       touchGrass === true &&
       playerAnimateFrames % 2 === 1 &&
@@ -608,7 +607,10 @@ function draw() {
   // draw Menu State
   if (state === "menu") {
     //drawing
-
+    //background
+    // ctx.fillStyle=colors.white
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // if(gameClicked===true){
     const gradient = ctx.createLinearGradient(0, 0, 0, 300);
     gradient.addColorStop(0, colors.black);
     gradient.addColorStop(0.7, colors.pink);
@@ -618,7 +620,8 @@ function draw() {
     drawStars();
     ctx.fillStyle = colors.black;
     ctx.fillRect(0, 300, canvas.width, 100);
-    //make player bigger for clothing purposes
+
+    //player
     ctx.fillStyle = colors.pink;
     ctx.fillRect(
       canvas.width / 2,
@@ -642,17 +645,31 @@ function draw() {
       2 * 4,
       2 * 4
     );
+
+    //Text
+    
     ctx.globalAlpha = 1;
     ctx.fillStyle = colors.white;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.font = "30px Arial";
-    ctx.fillText("The Thirteen Storms of", canvas.width / 2, 60);
+    ctx.fillText("The Thirteen Storms of", canvas.width / 2, 90);
     ctx.fillStyle = colors.black;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
-    ctx.font = "40px Georgia";
-    ctx.fillText(stormGodChosen, canvas.width / 2, 140);
+    ctx.font = "60px Georgia";
+    ctx.fillText(stormGodChosen, canvas.width / 2, canvas.height/2);
+    ctx.fillStyle=colors.white
+    ctx.textAlign="center"
+    ctx.textBaseline="middle"
+    ctx.font="30px Arial"
+    ctx.fillText("Press Enter to Start",canvas.width/2,350)
+
+    // }else { ctx.fillStyle = colors.black;
+    //   ctx.textAlign = "center";
+    //   ctx.textBaseline = "middle";
+    //   ctx.font = "60px Arial";
+    //   ctx.fillText("Please Click :)", canvas.width / 2, canvas.height/2);}
 
     //music
     {
@@ -765,13 +782,55 @@ function draw() {
     if (ctx === null) {
       throw new Error("hi");
     }
-    ctx.fillStyle = "purple";
+    //goal
+    ctx.fillStyle = colors.yellow;
     ctx.fillRect(
       lastPlatform.x + lastPlatform.w / 2,
       lastPlatform.y - 10,
       10,
       10
     );
+    ctx.fillStyle=colors.pink
+    ctx.strokeStyle=colors.black
+    ctx.lineWidth=1
+    ctx.beginPath()
+    ctx.moveTo(lastPlatform.x+lastPlatform.w/2-5,lastPlatform.y-10)
+    ctx.lineTo(lastPlatform.x+lastPlatform.w/2+15,lastPlatform.y-10)
+    ctx.lineTo(lastPlatform.x+lastPlatform.w/2+5,lastPlatform.y-20)
+    ctx.fill()
+    ctx.stroke()
+
+    //Village Houses
+    ctx.fillStyle = colors.black;
+    ctx.fillRect(
+      lastPlatform.x-5 ,
+      lastPlatform.y - 10,
+      10,
+      10
+    );
+    ctx.fillStyle=colors.pink
+    ctx.beginPath()
+    ctx.moveTo(lastPlatform.x-10,lastPlatform.y-10)
+    ctx.lineTo(lastPlatform.x+10,lastPlatform.y-10)
+    ctx.lineTo(lastPlatform.x+0,lastPlatform.y-20)
+    ctx.fill()
+    ctx.stroke()
+
+    ctx.fillStyle = colors.black;
+    ctx.fillRect(
+      lastPlatform.x+lastPlatform.w-5 ,
+      lastPlatform.y - 10,
+      10,
+      10
+    );
+    ctx.fillStyle=colors.pink
+    ctx.beginPath()
+    ctx.moveTo(lastPlatform.x+lastPlatform.w-10,lastPlatform.y-10)
+    ctx.lineTo(lastPlatform.x+lastPlatform.w+10,lastPlatform.y-10)
+    ctx.lineTo(lastPlatform.x+lastPlatform.w,lastPlatform.y-20)
+    ctx.fill()
+    ctx.stroke()
+    
   }
   function drawPlatforms() {
     if (ctx === null) {
