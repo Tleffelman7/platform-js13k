@@ -721,11 +721,11 @@ function draw() {
       ctx.fillText(
         "in " + displayMinutes + ":" + displaySeconds,
         canvas.width / 2,
-        60 + 27
+        150
       );
       ctx.fillStyle = colors.black;
       ctx.font = "17px Arial";
-      ctx.fillText("Press R to Restart", canvas.width / 2, 111);
+      ctx.fillText("Press R to Restart", canvas.width / 2, 121);
 
       ctx.fillStyle = colors.black;
       ctx.textAlign = "center";
