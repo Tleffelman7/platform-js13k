@@ -24,7 +24,7 @@ let levelTimes = [];
 let stars = [];
 const audioctx = new AudioContext();
 const masterGain = audioctx.createGain();
-masterGain.gain.setValueAtTime(0, 0);
+masterGain.gain.setValueAtTime(0.2, 0);
 let gameMute=false
 masterGain.connect(audioctx.destination);
 let songPlayed = false;
@@ -248,7 +248,7 @@ function generateStars() {
 
 generateStars();
 //starMovement();
-let state = "game"; // "menu" "game" "pause" "end"
+let state = "menu"; // "menu" "game" "pause" "end"
 
 function draw() {
   
