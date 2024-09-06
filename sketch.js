@@ -715,17 +715,17 @@ function draw() {
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
       ctx.font = "40px Arial";
-      ctx.fillText("Storm Braved", canvas.width / 2, 60);
+      ctx.fillText("Storm Braved", canvas.width / 2, 90);
       ctx.fillStyle = colors.black;
       ctx.font = "20px Arial";
       ctx.fillText(
         "in " + displayMinutes + ":" + displaySeconds,
         canvas.width / 2,
-        150
+        170
       );
       ctx.fillStyle = colors.black;
       ctx.font = "17px Arial";
-      ctx.fillText("Press R to Restart", canvas.width / 2, 121);
+      ctx.fillText("Press R to Restart", canvas.width / 2, 190);
 
       ctx.fillStyle = colors.black;
       ctx.textAlign = "center";
