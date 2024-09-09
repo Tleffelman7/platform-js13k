@@ -77,6 +77,9 @@ let platforms = [
 let clouds = [
   
 ];
+let rain=[];
+let rainDrops=50
+const rainFallSpeed=.1;
 let firstY = 330;
 const canvas = document.createElement("canvas");
 canvas.width = 400;
@@ -225,7 +228,18 @@ function generatePlatforms() {
       width: cloudWidth,
       height: cloudHeight,
     });
+for(let j=0; j<rainDrops;j++){
+    rain.push({
+      x:Math.random()*cloudWidth+clouds[i].x,
+      y:Math.random()*cloudHeight+clouds[i].y,
+      r:Math.random()*1+2
+    })
   }
+  }
+for(let i=0;i<rain.length;i++){
+  rain
+}
+
 }
 generatePlatforms();
 
@@ -282,7 +296,10 @@ function draw() {
     if (pauseMenu === true) {
       state = "pause";
     }
-
+function rainPhysics(){
+for(let i=0;i<rain.length;i++)
+rain[i].y+=rain[i].rainFallSpeed
+}
     thirteenPhysics();
     function thirteenPhysics() {
       for (let i = 0; i < clouds.length; i++) {
@@ -346,6 +363,7 @@ function draw() {
     }
 
     playerx += playerdx;
+  
 
     if (Math.sign(playerdx) === -1) {
       playerdx += 0.5;
@@ -511,6 +529,7 @@ function draw() {
       drawMirror(drawClouds);
       drawMirror(drawPlatforms);
     }
+    drawRain()
     //draw player
     ctx.fillStyle = colors.pink;
     let playerAnimateSpeed=150
@@ -979,6 +998,27 @@ function draw() {
       ctx.fill();
     }
   }
+  function drawRain(){
+    if (ctx === null) {
+      throw new Error("hi");
+    }
+    
+    for(let i=0;i<rain.length;i++){
+      
+    ctx.fillStyle="blue"
+    ctx.beginPath()
+    ctx.roundRect(
+      rain[i].x,
+      rain[i].y,
+      rain[i].r,
+      rain[i].r,
+      100
+    )
+    ctx.fill()
+  }
+
+  
+  }
 }
 
 //menu music
@@ -1008,7 +1048,7 @@ function gameSong() {
       notes.length * (gameDelayStart - gameSongDelay * numPlatforms) * 1000;
   }
 }
-
+//jump sound
 function jumpSound(){
 for (let i=0; i<jumpNotes.length;i++){
   soundEffect(
