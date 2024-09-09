@@ -25,7 +25,7 @@ let stars = [];
 const audioctx = new AudioContext();
 const masterGain = audioctx.createGain();
 masterGain.gain.setValueAtTime(0.2, 0);
-let gameMute=false
+let gameMute = false;
 masterGain.connect(audioctx.destination);
 let songPlayed = false;
 let gameClicked = false;
@@ -55,7 +55,7 @@ const stormGods = [
   "TEFNUT",
 ];
 const stormGodChosen = stormGods[Math.floor(Math.random() * stormGods.length)];
-const jumpNotes=[523.25]
+const jumpNotes = [523.25];
 
 const jumpHeight = 90;
 const jumpRun = 70;
@@ -71,15 +71,11 @@ const blackAlpha = "#272744bf";
 const peakHeight = 100;
 const peakWidth = 10;
 
-let platforms = [
- 
-];
-let clouds = [
-  
-];
-let rain=[];
-let rainDrops=50
-const rainFallSpeed=.1;
+let platforms = [];
+let clouds = [];
+let rain = [];
+let rainDrops = 30;
+let rainFallSpeed = 0.5;
 let firstY = 330;
 const canvas = document.createElement("canvas");
 canvas.width = 400;
@@ -95,9 +91,9 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
 }
 
 document.body.onkeydown = (e) => {
-  if (e.key === "w" && touchGrass === true){
+  if (e.key === "w" && touchGrass === true) {
     playerdy = -10;
-    jumpSound()
+    jumpSound();
   }
   if (e.key === "d") {
     dIsDown = true;
@@ -115,11 +111,12 @@ document.body.onkeydown = (e) => {
     pauseMenu = true;
     gameStart = false;
   }
-  if (e.key==="m"&& gameMute===false)
-    {masterGain.gain.setValueAtTime(0, 0);
-    gameMute=true
-  }else if(gameMute===true){masterGain.gain.setValueAtTime(0.2, 0)
-    gameMute=false
+  if (e.key === "m" && gameMute === false) {
+    masterGain.gain.setValueAtTime(0, 0);
+    gameMute = true;
+  } else if (gameMute === true) {
+    masterGain.gain.setValueAtTime(0.2, 0);
+    gameMute = false;
   }
 
   if (e.key === "Enter" && state === "menu") {
@@ -158,6 +155,7 @@ function generatePlatforms() {
   //point 10px from farthest left/right platform
   platforms = [];
   clouds = [];
+  rain = [];
   const firstWidth =
     Math.random() * (widthRange[1] - widthRange[0]) + widthRange[0];
   const firstX = Math.random() * (platformMaxSpawnx - firstWidth) + 200;
@@ -191,7 +189,6 @@ function generatePlatforms() {
         newCenterX + width / 2 <
           platformMaxSpawnx + (gameAreaWidth - platformMaxSpawnx) / 2
       ) {
-        
         platforms.push({
           x: newCenterX - width / 2,
           y: newY,
@@ -228,26 +225,25 @@ function generatePlatforms() {
       width: cloudWidth,
       height: cloudHeight,
     });
-for(let j=0; j<rainDrops;j++){
-    rain.push({
-      x:Math.random()*cloudWidth+clouds[i].x,
-      y:Math.random()*cloudHeight+clouds[i].y,
-      r:Math.random()*1+2
-    })
-  }
-  }
-for(let i=0;i<rain.length;i++){
-  rain
-}
 
+    for (let j = 0; j < rainDrops; j++) {
+      rain.push({
+        x: Math.random() * clouds[i].width + clouds[i].x,
+        y: Math.random() * clouds[i].height + clouds[i].y,
+        r: Math.random() * 1 + 2,
+        cloudOwnership: i,
+      });
+    }
+  }
+  for (let i = 0; i < rain.length; i++) {
+    rain;
+  }
 }
 generatePlatforms();
 
 // Make Stars
 function generateStars() {
   const starRadius = 100;
-
- 
 
   stars = [];
 
@@ -264,10 +260,9 @@ function generateStars() {
 
 generateStars();
 //starMovement();
-let state = "game"; // "menu" "game" "pause" "end"
+let state = "menu"; // "menu" "game" "pause" "end"
 
 function draw() {
-  
   const ctx = canvas.getContext("2d");
   if (ctx === null) {
     throw new Error("hi");
@@ -296,10 +291,6 @@ function draw() {
     if (pauseMenu === true) {
       state = "pause";
     }
-function rainPhysics(){
-for(let i=0;i<rain.length;i++)
-rain[i].y+=rain[i].rainFallSpeed
-}
     thirteenPhysics();
     function thirteenPhysics() {
       for (let i = 0; i < clouds.length; i++) {
@@ -307,15 +298,32 @@ rain[i].y+=rain[i].rainFallSpeed
         if (clouds[i].x >= platforms[i].x + 150) {
           clouds[i].x = platforms[i].x + 150;
           clouds[i].baddx = -1 * clouds[i].speed;
+
+          //for (let j = 0; j < rainDrops; j++) {
+          // rain.splice(0, 0, {
+          //   x: Math.random() * clouds[i].w + clouds[i].x,
+          //   y: Math.random() * clouds[i].h + clouds[i].y,
+          //   r: Math.random() * 1 + 2,
+          // });
+          //}
         }
         if (clouds[i].x <= platforms[i].x - 150) {
           clouds[i].x = platforms[i].x - 150;
           clouds[i].baddx = 1 * clouds[i].speed;
         }
+        for (let j = 0; j < rain.length; j++) {
+          rain[j].y += rainFallSpeed;
+          if (rain[j].y > 800) {
+            rain[j].y = clouds[rain[j].cloudOwnership].y;
+            rain[j].x =
+              Math.random() * clouds[rain[j].cloudOwnership].width +
+              clouds[rain[j].cloudOwnership].x;
+          }
+        }
 
-        const distBadx = Math.sqrt(
-          (playerx - clouds[i].x) ** 2 + (playery - clouds[i].y) ** 2
-        );
+        // const distBadx = Math.sqrt(
+        //   (playerx - clouds[i].x) ** 2 + (playery - clouds[i].y) ** 2
+        // );
       }
     }
     for (let i = 0; i < clouds.length; i++) {
@@ -363,7 +371,6 @@ rain[i].y+=rain[i].rainFallSpeed
     }
 
     playerx += playerdx;
-  
 
     if (Math.sign(playerdx) === -1) {
       playerdx += 0.5;
@@ -382,7 +389,7 @@ rain[i].y+=rain[i].rainFallSpeed
     }
 
     //controls
-   
+
     if (dIsDown === true) {
       playerx += 2;
     }
@@ -425,8 +432,6 @@ rain[i].y+=rain[i].rainFallSpeed
           touchGrass = true;
         }
       }
-
-   
     }
     //player at end
 
@@ -452,39 +457,41 @@ rain[i].y+=rain[i].rainFallSpeed
         generatePlatforms();
         stopSoundEffects();
         gameSong();
+        rainFallSpeed += 0.05;
       } else if (numPlatforms === 13) {
         // Time it took to complete Levels
         {
-        for (let i = 0; i < numPlatforms; i++) {
-          if (i === 0) {
-            subtractedLevelTime.push(levelTimes[0]);
-          } else subtractedLevelTime[i] = levelTimes[i] - levelTimes[i - 1];
-          subtractedLevelTimeMinutes.push(
-            Math.floor(subtractedLevelTime[i] / 60)
-          );
-          subtractedLevelTimeSeconds.push(subtractedLevelTime[i] % 60);
-          displaySubtractedLevelTimeMinutes.push(
-            subtractedLevelTimeMinutes[i] + ""
-          );
-          displaySubtractedLevelTimeSeconds.push(
-            subtractedLevelTimeSeconds[i] + ""
-          );
-          if (subtractedLevelTimeMinutes[i] < 10) {
-            displaySubtractedLevelTimeMinutes[i] =
-              "0" + displaySubtractedLevelTimeMinutes[i];
-          }
-          if (subtractedLevelTimeSeconds[i] < 10) {
-            displaySubtractedLevelTimeSeconds[i] =
-              "0" + displaySubtractedLevelTimeSeconds[i];
+          for (let i = 0; i < numPlatforms; i++) {
+            if (i === 0) {
+              subtractedLevelTime.push(levelTimes[0]);
+            } else subtractedLevelTime[i] = levelTimes[i] - levelTimes[i - 1];
+            subtractedLevelTimeMinutes.push(
+              Math.floor(subtractedLevelTime[i] / 60)
+            );
+            subtractedLevelTimeSeconds.push(subtractedLevelTime[i] % 60);
+            displaySubtractedLevelTimeMinutes.push(
+              subtractedLevelTimeMinutes[i] + ""
+            );
+            displaySubtractedLevelTimeSeconds.push(
+              subtractedLevelTimeSeconds[i] + ""
+            );
+            if (subtractedLevelTimeMinutes[i] < 10) {
+              displaySubtractedLevelTimeMinutes[i] =
+                "0" + displaySubtractedLevelTimeMinutes[i];
+            }
+            if (subtractedLevelTimeSeconds[i] < 10) {
+              displaySubtractedLevelTimeSeconds[i] =
+                "0" + displaySubtractedLevelTimeSeconds[i];
+            }
           }
         }
-      }
         state = "end";
         numPlatforms = 1;
         generatePlatforms();
         gameTime = Math.floor(performance.now() / 1000);
         stopSoundEffects();
         menuSong();
+        rainFallSpeed = 0.5;
         return;
       }
     }
@@ -527,13 +534,16 @@ rain[i].y+=rain[i].rainFallSpeed
       drawMirror(drawControls);
       drawMirror(drawGoal);
       drawMirror(drawClouds);
+      drawMirror(drawRain);
       drawMirror(drawPlatforms);
     }
-    drawRain()
+
     //draw player
     ctx.fillStyle = colors.pink;
-    let playerAnimateSpeed=150
-    const playerAnimateFrames = Math.round(performance.now() / playerAnimateSpeed);
+    let playerAnimateSpeed = 150;
+    const playerAnimateFrames = Math.round(
+      performance.now() / playerAnimateSpeed
+    );
     if (
       touchGrass === true &&
       playerAnimateFrames % 2 === 1 &&
@@ -599,7 +609,6 @@ rain[i].y+=rain[i].rainFallSpeed
     ) {
       gameSong(); // Restart the music
     }
-
 
     //draw pause menu
     if (state === "pause") {
@@ -669,7 +678,7 @@ rain[i].y+=rain[i].rainFallSpeed
     );
 
     //Text
-    
+
     ctx.globalAlpha = 1;
     ctx.fillStyle = colors.white;
     ctx.textAlign = "center";
@@ -680,12 +689,12 @@ rain[i].y+=rain[i].rainFallSpeed
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
     ctx.font = "60px Georgia";
-    ctx.fillText(stormGodChosen, canvas.width / 2, canvas.height/2);
-    ctx.fillStyle=colors.white
-    ctx.textAlign="center"
-    ctx.textBaseline="middle"
-    ctx.font="30px Arial"
-    ctx.fillText("Press Enter to Start",canvas.width/2,350)
+    ctx.fillText(stormGodChosen, canvas.width / 2, canvas.height / 2);
+    ctx.fillStyle = colors.white;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "30px Arial";
+    ctx.fillText("Press Enter to Start", canvas.width / 2, 350);
 
     // }else { ctx.fillStyle = colors.black;
     //   ctx.textAlign = "center";
@@ -812,47 +821,41 @@ rain[i].y+=rain[i].rainFallSpeed
       10,
       10
     );
-    ctx.fillStyle=colors.pink
-    ctx.strokeStyle=colors.black
-    ctx.lineWidth=1
-    ctx.beginPath()
-    ctx.moveTo(lastPlatform.x+lastPlatform.w/2-5,lastPlatform.y-10)
-    ctx.lineTo(lastPlatform.x+lastPlatform.w/2+15,lastPlatform.y-10)
-    ctx.lineTo(lastPlatform.x+lastPlatform.w/2+5,lastPlatform.y-20)
-    ctx.fill()
-    ctx.stroke()
+    ctx.fillStyle = colors.pink;
+    ctx.strokeStyle = colors.black;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(lastPlatform.x + lastPlatform.w / 2 - 5, lastPlatform.y - 10);
+    ctx.lineTo(lastPlatform.x + lastPlatform.w / 2 + 15, lastPlatform.y - 10);
+    ctx.lineTo(lastPlatform.x + lastPlatform.w / 2 + 5, lastPlatform.y - 20);
+    ctx.fill();
+    ctx.stroke();
 
     //Village Houses
     ctx.fillStyle = colors.black;
-    ctx.fillRect(
-      lastPlatform.x-5 ,
-      lastPlatform.y - 10,
-      10,
-      10
-    );
-    ctx.fillStyle=colors.pink
-    ctx.beginPath()
-    ctx.moveTo(lastPlatform.x-10,lastPlatform.y-10)
-    ctx.lineTo(lastPlatform.x+10,lastPlatform.y-10)
-    ctx.lineTo(lastPlatform.x+0,lastPlatform.y-20)
-    ctx.fill()
-    ctx.stroke()
+    ctx.fillRect(lastPlatform.x - 5, lastPlatform.y - 10, 10, 10);
+    ctx.fillStyle = colors.pink;
+    ctx.beginPath();
+    ctx.moveTo(lastPlatform.x - 10, lastPlatform.y - 10);
+    ctx.lineTo(lastPlatform.x + 10, lastPlatform.y - 10);
+    ctx.lineTo(lastPlatform.x + 0, lastPlatform.y - 20);
+    ctx.fill();
+    ctx.stroke();
 
     ctx.fillStyle = colors.black;
     ctx.fillRect(
-      lastPlatform.x+lastPlatform.w-5 ,
+      lastPlatform.x + lastPlatform.w - 5,
       lastPlatform.y - 10,
       10,
       10
     );
-    ctx.fillStyle=colors.pink
-    ctx.beginPath()
-    ctx.moveTo(lastPlatform.x+lastPlatform.w-10,lastPlatform.y-10)
-    ctx.lineTo(lastPlatform.x+lastPlatform.w+10,lastPlatform.y-10)
-    ctx.lineTo(lastPlatform.x+lastPlatform.w,lastPlatform.y-20)
-    ctx.fill()
-    ctx.stroke()
-    
+    ctx.fillStyle = colors.pink;
+    ctx.beginPath();
+    ctx.moveTo(lastPlatform.x + lastPlatform.w - 10, lastPlatform.y - 10);
+    ctx.lineTo(lastPlatform.x + lastPlatform.w + 10, lastPlatform.y - 10);
+    ctx.lineTo(lastPlatform.x + lastPlatform.w, lastPlatform.y - 20);
+    ctx.fill();
+    ctx.stroke();
   }
   function drawPlatforms() {
     if (ctx === null) {
@@ -998,26 +1001,17 @@ rain[i].y+=rain[i].rainFallSpeed
       ctx.fill();
     }
   }
-  function drawRain(){
+  function drawRain() {
     if (ctx === null) {
       throw new Error("hi");
     }
-    
-    for(let i=0;i<rain.length;i++){
-      
-    ctx.fillStyle="blue"
-    ctx.beginPath()
-    ctx.roundRect(
-      rain[i].x,
-      rain[i].y,
-      rain[i].r,
-      rain[i].r,
-      100
-    )
-    ctx.fill()
-  }
 
-  
+    for (let i = 0; i < rain.length; i++) {
+      ctx.fillStyle = "blue";
+      ctx.beginPath();
+      ctx.roundRect(rain[i].x, rain[i].y, rain[i].r, rain[i].r, 100);
+      ctx.fill();
+    }
   }
 }
 
@@ -1049,15 +1043,10 @@ function gameSong() {
   }
 }
 //jump sound
-function jumpSound(){
-for (let i=0; i<jumpNotes.length;i++){
-  soundEffect(
-    "triangle",
-    jumpNotes[i],
-    .15,
-    .1
-  )
-}
+function jumpSound() {
+  for (let i = 0; i < jumpNotes.length; i++) {
+    soundEffect("triangle", jumpNotes[i], 0.15, 0.1);
+  }
 }
 window.setInterval(draw, 1000 / 60);
 
