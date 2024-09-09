@@ -55,6 +55,7 @@ const stormGods = [
   "TEFNUT",
 ];
 const stormGodChosen = stormGods[Math.floor(Math.random() * stormGods.length)];
+const jumpNotes=[523.25]
 
 const jumpHeight = 90;
 const jumpRun = 70;
@@ -93,6 +94,7 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
 document.body.onkeydown = (e) => {
   if (e.key === "w" && touchGrass === true){
     playerdy = -10;
+    jumpSound()
   }
   if (e.key === "d") {
     dIsDown = true;
@@ -248,7 +250,7 @@ function generateStars() {
 
 generateStars();
 //starMovement();
-let state = "menu"; // "menu" "game" "pause" "end"
+let state = "game"; // "menu" "game" "pause" "end"
 
 function draw() {
   
@@ -578,6 +580,7 @@ function draw() {
     ) {
       gameSong(); // Restart the music
     }
+
 
     //draw pause menu
     if (state === "pause") {
@@ -1006,6 +1009,16 @@ function gameSong() {
   }
 }
 
+function jumpSound(){
+for (let i=0; i<jumpNotes.length;i++){
+  soundEffect(
+    "triangle",
+    jumpNotes[i],
+    .15,
+    .1
+  )
+}
+}
 window.setInterval(draw, 1000 / 60);
 
 function soundEffect(
