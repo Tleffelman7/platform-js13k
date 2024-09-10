@@ -21,6 +21,16 @@ let subtractedLevelTimeSeconds = [];
 let displaySubtractedLevelTimeMinutes = [];
 let displaySubtractedLevelTimeSeconds = [];
 let levelTimes = [];
+
+let gameRank = [
+  "Invigorated",
+  "refreshed",
+  "Well Rested",
+  "Bedraggled",
+  "Exhausted",
+  "Insomniac",
+];
+
 let stars = [];
 const audioctx = new AudioContext();
 const masterGain = audioctx.createGain();
@@ -93,7 +103,7 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
 document.body.onkeydown = (e) => {
   if (e.key === "w" && touchGrass === true) {
     playerdy = -10;
-    jumpSound();
+    //jumpSound();
   }
   if (e.key === "d") {
     dIsDown = true;
@@ -127,6 +137,8 @@ document.body.onkeydown = (e) => {
     state = "game";
     stopSoundEffects;
     gameSong();
+
+    levelTimes = [];
   }
 };
 
@@ -260,7 +272,7 @@ function generateStars() {
 
 generateStars();
 //starMovement();
-let state = "menu"; // "menu" "game" "pause" "end"
+let state = "end"; // "menu" "game" "pause" "end"
 
 function draw() {
   const ctx = canvas.getContext("2d");
@@ -460,31 +472,14 @@ function draw() {
         rainFallSpeed += 0.05;
       } else if (numPlatforms === 13) {
         // Time it took to complete Levels
-        {
-          for (let i = 0; i < numPlatforms; i++) {
-            if (i === 0) {
-              subtractedLevelTime.push(levelTimes[0]);
-            } else subtractedLevelTime[i] = levelTimes[i] - levelTimes[i - 1];
-            subtractedLevelTimeMinutes.push(
-              Math.floor(subtractedLevelTime[i] / 60)
-            );
-            subtractedLevelTimeSeconds.push(subtractedLevelTime[i] % 60);
-            displaySubtractedLevelTimeMinutes.push(
-              subtractedLevelTimeMinutes[i] + ""
-            );
-            displaySubtractedLevelTimeSeconds.push(
-              subtractedLevelTimeSeconds[i] + ""
-            );
-            if (subtractedLevelTimeMinutes[i] < 10) {
-              displaySubtractedLevelTimeMinutes[i] =
-                "0" + displaySubtractedLevelTimeMinutes[i];
-            }
-            if (subtractedLevelTimeSeconds[i] < 10) {
-              displaySubtractedLevelTimeSeconds[i] =
-                "0" + displaySubtractedLevelTimeSeconds[i];
-            }
-          }
-        }
+        subtractedLevelTime = [];
+        subtractedLevelTimeMinutes = [];
+        subtractedLevelTimeSeconds = [];
+        displaySubtractedLevelTimeMinutes = [];
+        displaySubtractedLevelTimeSeconds = [];
+
+        levelCompleteTime();
+
         state = "end";
         numPlatforms = 1;
         generatePlatforms();
@@ -628,6 +623,23 @@ function draw() {
   const gameTimeSeconds = gameTime % 60;
   let displaySeconds = gameTimeSeconds + "";
   let displayMinutes = gameTimeMinutes + "";
+  let endStatus = "";
+  //end Status/Rank
+  {
+    if (gameTimeMinutes < 2) {
+      endStatus = gameRank[0];
+    } else if (gameTimeMinutes < 3) {
+      endStatus = gameRank[1];
+    } else if (gameTimeMinutes < 4) {
+      endStatus = gameRank[2];
+    } else if (gameTimeMinutes < 5) {
+      endStatus = gameRank[3];
+    } else if (gameTimeMinutes < 6) {
+      endStatus = gameRank[4];
+    } else {
+      endStatus = gameRank[5];
+    }
+  }
   if (gameTimeSeconds < 10) {
     displaySeconds = "0" + displaySeconds;
   }
@@ -752,46 +764,47 @@ function draw() {
       ctx.fillText(
         "in " + displayMinutes + ":" + displaySeconds,
         canvas.width / 2,
-        170
+        107
       );
       ctx.fillStyle = colors.black;
       ctx.font = "17px Arial";
       ctx.fillText("Press R to Restart", canvas.width / 2, 190);
+      ctx.fillStyle = colors.black;
+      ctx.font = "30px Arial";
+      ctx.fillText(endStatus, canvas.width / 2, 155);
 
       ctx.fillStyle = colors.black;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.font = "20px Arial";
       for (
-        let i = 0;
+        let i = 1;
         i < Math.floor(displaySubtractedLevelTimeMinutes.length / 2);
         i++
       ) {
         ctx.fillText(
           i +
-            1 +
             " " +
             displaySubtractedLevelTimeMinutes[i] +
             ":" +
             displaySubtractedLevelTimeSeconds[i],
           canvas.width / 3,
-          225 + i * 25
+          210 + i * 25
         );
       }
-      for (let i = 6; i < displaySubtractedLevelTimeMinutes.length; i++) {
+      for (let i = 7; i < displaySubtractedLevelTimeMinutes.length - 1; i++) {
         ctx.fillStyle = colors.black;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = "20px Arial";
         ctx.fillText(
           i +
-            1 +
             " " +
             displaySubtractedLevelTimeMinutes[i] +
             ":" +
             displaySubtractedLevelTimeSeconds[i],
           (canvas.width / 3) * 2,
-          225 + (i - 6) * 25
+          210 + (i - 6) * 25
         );
       }
     }
@@ -1072,4 +1085,23 @@ function stopSoundEffects() {
     oscillators[i].stop();
   }
   oscillators = [];
+}
+function levelCompleteTime() {
+  levelTimes[0] = 0;
+  for (let i = 0; i < numPlatforms + 1; i++) {
+    if (i === 0) {
+    } else subtractedLevelTime[i] = levelTimes[i] - levelTimes[i - 1];
+    subtractedLevelTimeMinutes.push(Math.floor(subtractedLevelTime[i] / 60));
+    subtractedLevelTimeSeconds.push(subtractedLevelTime[i] % 60);
+    displaySubtractedLevelTimeMinutes.push(subtractedLevelTimeMinutes[i] + "");
+    displaySubtractedLevelTimeSeconds.push(subtractedLevelTimeSeconds[i] + "");
+    if (subtractedLevelTimeMinutes[i] < 10) {
+      displaySubtractedLevelTimeMinutes[i] =
+        "0" + displaySubtractedLevelTimeMinutes[i];
+    }
+    if (subtractedLevelTimeSeconds[i] < 10) {
+      displaySubtractedLevelTimeSeconds[i] =
+        "0" + displaySubtractedLevelTimeSeconds[i];
+    }
+  }
 }
