@@ -21,6 +21,8 @@ let subtractedLevelTimeSeconds = [];
 let displaySubtractedLevelTimeMinutes = [];
 let displaySubtractedLevelTimeSeconds = [];
 let levelTimes = [];
+const screenShakeTime = 300;
+let timeSinceTouchedCloud = screenShakeTime;
 
 let gameRank = [
   "Invigorated",
@@ -65,7 +67,7 @@ const stormGods = [
   "TEFNUT",
 ];
 const stormGodChosen = stormGods[Math.floor(Math.random() * stormGods.length)];
-const jumpNotes = [523.25];
+const jumpNotes = [2000, 200];
 
 const jumpHeight = 90;
 const jumpRun = 70;
@@ -103,7 +105,7 @@ function rectIntersect(x1, y1, w1, h1, x2, y2, w2, h2) {
 document.body.onkeydown = (e) => {
   if (e.key === "w" && touchGrass === true) {
     playerdy = -10;
-    //jumpSound();
+    jumpSound();
   }
   if (e.key === "d") {
     dIsDown = true;
@@ -137,7 +139,7 @@ document.body.onkeydown = (e) => {
     state = "game";
     stopSoundEffects;
     gameSong();
-
+    levelTimes[0] = performance.now();
     levelTimes = [];
   }
 };
@@ -272,9 +274,13 @@ function generateStars() {
 
 generateStars();
 //starMovement();
-let state = "end"; // "menu" "game" "pause" "end"
-
+let state = "menu"; // "menu" "game" "pause" "end"
+let prevTime = performance.now();
 function draw() {
+  const now = performance.now();
+  const dt = now - prevTime;
+  prevTime = now;
+
   const ctx = canvas.getContext("2d");
   if (ctx === null) {
     throw new Error("hi");
@@ -310,14 +316,6 @@ function draw() {
         if (clouds[i].x >= platforms[i].x + 150) {
           clouds[i].x = platforms[i].x + 150;
           clouds[i].baddx = -1 * clouds[i].speed;
-
-          //for (let j = 0; j < rainDrops; j++) {
-          // rain.splice(0, 0, {
-          //   x: Math.random() * clouds[i].w + clouds[i].x,
-          //   y: Math.random() * clouds[i].h + clouds[i].y,
-          //   r: Math.random() * 1 + 2,
-          // });
-          //}
         }
         if (clouds[i].x <= platforms[i].x - 150) {
           clouds[i].x = platforms[i].x - 150;
@@ -373,6 +371,7 @@ function draw() {
 
       // Check for collision conditions
       if (distBad === true) {
+        timeSinceTouchedCloud = 0;
         playerdy = -5;
         if (distBadLeft === true) {
           playerdx = -10;
@@ -505,6 +504,24 @@ function draw() {
       -playerx + 200 - playerSize / 2,
       -playery + 300 - playerSize / 2
     );
+
+    timeSinceTouchedCloud += dt;
+
+    if (timeSinceTouchedCloud < screenShakeTime) {
+      const shakeTimeRemaining = screenShakeTime - timeSinceTouchedCloud;
+      const shakeInitialStrength = 10;
+      const shakeStrength = shakeTimeRemaining / screenShakeTime;
+      ctx.translate(
+        Math.round(
+          Math.random() * shakeInitialStrength * shakeStrength -
+            shakeInitialStrength / 2
+        ),
+        Math.round(
+          Math.random() * shakeInitialStrength * shakeStrength -
+            shakeInitialStrength / 2
+        )
+      );
+    }
     function drawMirror(mirror) {
       mirror();
       if (ctx === null) {
@@ -651,68 +668,71 @@ function draw() {
   if (state === "menu") {
     //drawing
     //background
-    // ctx.fillStyle=colors.white
-    // ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // if(gameClicked===true){
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, colors.black);
-    gradient.addColorStop(0.7, colors.pink);
-    gradient.addColorStop(1, colors.yellow);
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = colors.white;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawStars();
-    ctx.fillStyle = colors.black;
-    ctx.fillRect(0, 300, canvas.width, 100);
+    if (gameClicked === true) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, colors.black);
+      gradient.addColorStop(0.7, colors.pink);
+      gradient.addColorStop(1, colors.yellow);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawStars();
+      ctx.fillStyle = colors.black;
+      ctx.fillRect(0, 300, canvas.width, 100);
 
-    //player
-    ctx.fillStyle = colors.pink;
-    ctx.fillRect(
-      canvas.width / 2,
-      300 - playerSize * 4,
-      playerSize * 4,
-      playerSize * 4
-    );
-    ctx.fillStyle = colors.blue;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 300 - (playerSize * 4) / 2);
-    ctx.lineTo(canvas.width / 2 + playerSize * 4, 300 - (playerSize * 4) / 2);
-    ctx.lineTo(canvas.width / 2, 300);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    //eye
-    ctx.fillStyle = "black";
-    ctx.fillRect(
-      canvas.width / 2 + playerSize * 4 - 12,
-      300 - ((playerSize * 4) / 4) * 3.5,
-      2 * 4,
-      2 * 4
-    );
+      //player
+      ctx.fillStyle = colors.pink;
+      ctx.translate(-playerSize * 2, 0);
+      ctx.fillRect(
+        canvas.width / 2,
+        300 - playerSize * 4,
+        playerSize * 4,
+        playerSize * 4
+      );
 
-    //Text
+      ctx.fillStyle = colors.blue;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, 300 - (playerSize * 4) / 2);
+      ctx.lineTo(canvas.width / 2 + playerSize * 4, 300 - (playerSize * 4) / 2);
+      ctx.lineTo(canvas.width / 2, 300);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      //eye
+      ctx.fillStyle = "black";
+      ctx.fillRect(
+        canvas.width / 2 + playerSize * 4 - 12,
+        300 - ((playerSize * 4) / 4) * 3.5,
+        2 * 4,
+        2 * 4
+      );
+      ctx.translate(playerSize * 2, 0);
+      //Text
 
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = colors.white;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
-    ctx.font = "30px Arial";
-    ctx.fillText("The Thirteen Storms of", canvas.width / 2, 90);
-    ctx.fillStyle = colors.black;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "bottom";
-    ctx.font = "60px Georgia";
-    ctx.fillText(stormGodChosen, canvas.width / 2, canvas.height / 2);
-    ctx.fillStyle = colors.white;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "30px Arial";
-    ctx.fillText("Press Enter to Start", canvas.width / 2, 350);
-
-    // }else { ctx.fillStyle = colors.black;
-    //   ctx.textAlign = "center";
-    //   ctx.textBaseline = "middle";
-    //   ctx.font = "60px Arial";
-    //   ctx.fillText("Please Click :)", canvas.width / 2, canvas.height/2);}
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = colors.white;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.font = "30px Arial";
+      ctx.fillText("The Thirteen Storms of", canvas.width / 2, 90);
+      ctx.fillStyle = colors.black;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.font = "60px Georgia";
+      ctx.fillText(stormGodChosen, canvas.width / 2, canvas.height / 2);
+      ctx.fillStyle = colors.white;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "30px Arial";
+      ctx.fillText("Press Enter to Start", canvas.width / 2, 350);
+    } else {
+      ctx.fillStyle = colors.black;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "60px Arial";
+      ctx.fillText("Please Click :)", canvas.width / 2, canvas.height / 2);
+    }
 
     //music
     {
@@ -1057,10 +1077,18 @@ function gameSong() {
 }
 //jump sound
 function jumpSound() {
-  for (let i = 0; i < jumpNotes.length; i++) {
-    soundEffect("triangle", jumpNotes[i], 0.15, 0.1);
-  }
+  const osc = audioctx.createOscillator();
+  osc.connect(masterGain);
+  osc.frequency.value = 800;
+  osc.type = "triangle";
+  //osc.start();
+  //osc.stop(audioctx.currentTime + duration);
+  osc.start(audioctx.currentTime);
+  osc.stop(audioctx.currentTime + 0.15);
+  oscillators.push(osc);
+  osc.frequency.exponentialRampToValueAtTime(200, 0.15 + audioctx.currentTime);
 }
+
 window.setInterval(draw, 1000 / 60);
 
 function soundEffect(
@@ -1087,7 +1115,6 @@ function stopSoundEffects() {
   oscillators = [];
 }
 function levelCompleteTime() {
-  levelTimes[0] = 0;
   for (let i = 0; i < numPlatforms + 1; i++) {
     if (i === 0) {
     } else subtractedLevelTime[i] = levelTimes[i] - levelTimes[i - 1];
