@@ -23,6 +23,7 @@ let displaySubtractedLevelTimeSeconds = [];
 let levelTimes = [];
 const screenShakeTime = 300;
 let timeSinceTouchedCloud = screenShakeTime;
+const cloudSound = new Audio("Extreme gust.wav");
 
 let gameRank = [
   "Invigorated",
@@ -261,11 +262,11 @@ function generateStars() {
 
   stars = [];
 
-  for (let i = 0; i <= 1100; i++) {
+  for (let i = 0; i <= 1300; i++) {
     let starSize = Math.random() * 4 + 2;
     stars.push({
       x: Math.random() * gameAreaWidth,
-      y: -400 + Math.random() * 1200,
+      y: -400 + Math.random() * 1400,
       r: starSize,
       movement: Math.random() + 1,
     });
@@ -372,6 +373,8 @@ function draw() {
       // Check for collision conditions
       if (distBad === true) {
         timeSinceTouchedCloud = 0;
+
+        cloudSound.play();
         playerdy = -5;
         if (distBadLeft === true) {
           playerdx = -10;
@@ -469,6 +472,7 @@ function draw() {
         stopSoundEffects();
         gameSong();
         rainFallSpeed += 0.05;
+        endGoalSound();
       } else if (numPlatforms === 13) {
         // Time it took to complete Levels
         subtractedLevelTime = [];
@@ -486,6 +490,7 @@ function draw() {
         stopSoundEffects();
         menuSong();
         rainFallSpeed = 0.5;
+
         return;
       }
     }
@@ -836,7 +841,7 @@ function draw() {
       throw new Error("hi");
     }
     ctx.fillStyle = "black";
-    ctx.fillRect(0, -400, gameAreaWidth, canvas.height + 800);
+    ctx.fillRect(0, -400, gameAreaWidth, canvas.height + 1000);
     drawStars();
 
     //stars
@@ -1074,6 +1079,20 @@ function gameSong() {
     gameSongDuration =
       notes.length * (gameDelayStart - gameSongDelay * numPlatforms) * 1000;
   }
+}
+
+//end goal Sound
+function endGoalSound() {
+  const osc = audioctx.createOscillator();
+  osc.connect(masterGain);
+  osc.frequency.value = 300;
+  osc.type = "sine";
+  //osc.start();
+  //osc.stop(audioctx.currentTime + duration);
+  osc.start(audioctx.currentTime);
+  osc.stop(audioctx.currentTime + 0.2);
+  oscillators.push(osc);
+  osc.frequency.exponentialRampToValueAtTime(900, 0.2 + audioctx.currentTime);
 }
 //jump sound
 function jumpSound() {
