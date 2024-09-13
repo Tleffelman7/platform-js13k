@@ -24,6 +24,7 @@ let levelTimes = [];
 const screenShakeTime = 300;
 let timeSinceTouchedCloud = screenShakeTime;
 const cloudSound = new Audio("Extreme gust.wav");
+let prevGameTime = 0;
 
 let gameRank = [
   "Invigorated",
@@ -125,10 +126,8 @@ document.body.onkeydown = (e) => {
     gameStart = false;
   }
   if (e.key === "m" && gameMute === false) {
-    masterGain.gain.setValueAtTime(0, 0);
     gameMute = true;
-  } else if (gameMute === true) {
-    masterGain.gain.setValueAtTime(0.2, 0);
+  } else if (e.key === "m" && gameMute === true) {
     gameMute = false;
   }
 
@@ -142,6 +141,7 @@ document.body.onkeydown = (e) => {
     gameSong();
     levelTimes[0] = performance.now();
     levelTimes = [];
+    prevGameTime = Math.floor(performance.now() / 1000);
   }
 };
 
@@ -282,6 +282,12 @@ function draw() {
   const dt = now - prevTime;
   prevTime = now;
 
+  if (gameMute === false) {
+    masterGain.gain.setValueAtTime(0.2, 0);
+  } else {
+    masterGain.gain.setValueAtTime(0, 0);
+  }
+
   const ctx = canvas.getContext("2d");
   if (ctx === null) {
     throw new Error("hi");
@@ -373,8 +379,10 @@ function draw() {
       // Check for collision conditions
       if (distBad === true) {
         timeSinceTouchedCloud = 0;
-
-        cloudSound.play();
+        if (gameMute === true) {
+        } else {
+          cloudSound.play();
+        }
         playerdy = -5;
         if (distBadLeft === true) {
           playerdx = -10;
@@ -486,7 +494,7 @@ function draw() {
         state = "end";
         numPlatforms = 1;
         generatePlatforms();
-        gameTime = Math.floor(performance.now() / 1000);
+        gameTime = Math.floor(performance.now() / 1000) - prevGameTime;
         stopSoundEffects();
         menuSong();
         rainFallSpeed = 0.5;
@@ -550,6 +558,7 @@ function draw() {
       drawMirror(drawFloor);
       drawMirror(drawControls);
       drawMirror(drawGoal);
+      drawMirror(drawCloudsOutline);
       drawMirror(drawClouds);
       drawMirror(drawRain);
       drawMirror(drawPlatforms);
@@ -730,7 +739,9 @@ function draw() {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.font = "30px Arial";
-      ctx.fillText("Press Enter to Start", canvas.width / 2, 350);
+      ctx.fillText("Press Enter to Start", canvas.width / 2, 335);
+      ctx.font = "20px Arial";
+      ctx.fillText("Press M to mute", canvas.width / 2, 365);
     } else {
       ctx.fillStyle = colors.black;
       ctx.textAlign = "center";
@@ -994,6 +1005,34 @@ function draw() {
       }
     }
   }
+
+  function drawCloudsOutline() {
+    if (ctx === null) {
+      throw new Error("hi");
+    }
+    for (let i = 0; i < clouds.length; i++) {
+      ctx.fillStyle = colors.white;
+
+      //outline circles
+      for (let j = 0; j < clouds[i].cloudPoints.length; j++) {
+        ctx.beginPath();
+        ctx.roundRect(
+          clouds[i].x +
+            clouds[i].cloudPoints[j].x -
+            clouds[i].cloudSegmentRadius,
+          clouds[i].y +
+            clouds[i].cloudPoints[j].y -
+            clouds[i].cloudSegmentRadius,
+          clouds[i].cloudSegmentRadius * 2.07,
+          clouds[i].cloudSegmentRadius * 2.07,
+          100
+        );
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+  }
+
   function drawFloor() {
     if (ctx === null) {
       throw new Error("hi");
